@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "eBay item location - My country only",
-  "author": "Mountassir El Hafi : mountassirhafi@gmail.com",
-  "homepage_url": "https://github.com/mountassir/ebay-search-extention",
-  "version": "1.1.16",
+  "name": "eBay item location and delivery - My country only with sort including delivery",
+  "author": "Mountassir El Hafi : mountassirhafi@gmail.com, extended by wech71",
+  "homepage_url": "https://github.com/wech71/ebay-search-extention",
+  "version": "1.2.0",
 
-  "description": "Always start your eBay search for items in your country location only.",
+  "description": "Always start your eBay search for items in your country location only and sort by price descending including delivery.",
   "icons": {
             "16":  "icons/main/icon-16.png",
             "19":  "icons/main/icon-19.png",

@@ -14,32 +14,62 @@ function setOverrideOption(overrideOption)
 	setWidgetChecked(overrideOption, true);
 }
 
+function setSortOverrideOption(sortOverrideOption) 
+{
+	if (!isSortOverrideOptionValid(sortOverrideOption)) 
+	{
+		sortOverrideOption = defaultSortOverride;
+
+		saveSortOverrideOptionToStorage(sortOverrideOption, function(){
+			log("Override sort option set to default: " + sortOverrideOption);
+		});
+	}
+
+	setWidgetChecked(sortOverrideOption, true);
+}
+
 function initOptions() 
 {
-	getOverrideOptionFromStorage(function(currentOverrideOption) {
+	getOverrideOptionFromStorage(function(currentOverrideOption, sortOverrideOption) {
 		setOverrideOption(currentOverrideOption);
+		setSortOverrideOption(sortOverrideOption);
 	});
 }
 
 function saveOptions()
 {
+	var modified = false;
 	let overrideOption = getSelectedOverrideOption();
+	let optionKey = {};
 
 	if(isOverrideOptionValid(overrideOption))
 	{
-		let optionKey = {};
 		optionKey[STORAGE_KEYS.OVERRIDE_OPTION] = overrideOption;
-		
-		chrome.storage.sync.set(optionKey, function() {
-			let status = document.getElementById('status');
-			status.textContent = 'Options saved.';
-			setTimeout(function() { status.textContent = ''; }, 750);
-		});
+		modified = true;
 	}
 	else
 	{
 		log("Got an invalid option, not saving: " + overrideOption, MESSAGE_TYPES.ERROR);
 	}
+	
+	let sortOverrideOption = getSelectedSortOverrideOption();
+
+	if(isSortOverrideOptionValid(sortOverrideOption))
+	{
+		optionKey[STORAGE_KEYS.SORT_OVERRIDE_OPTION] = sortOverrideOption;	
+		modified = true;
+	}
+	else
+	{
+		log("Got an invalid sort option, not saving: " + sortOverrideOption, MESSAGE_TYPES.ERROR);
+	}
+
+	if (modified)
+		chrome.storage.sync.set(optionKey, function() {
+		let status = document.getElementById('status');
+		status.textContent = 'Options saved.';
+		setTimeout(function() { status.textContent = ''; }, 750);
+	});
 }
 
 function getSelectedOverrideOption()
@@ -65,6 +95,32 @@ function getSelectedOverrideOption()
 	}
 }
 
+
+function getSelectedSortOverrideOption()
+{
+	if(isWidgetChecked(SORT_OVERRIDE_OPTIONS.BEST_RESULTS))
+	{
+		return SORT_OVERRIDE_OPTIONS.BEST_RESULTS;
+	}
+
+	if(isWidgetChecked(SORT_OVERRIDE_OPTIONS.CHEAPEST_WITH_DELIVERY_ONLY))
+	{
+		return SORT_OVERRIDE_OPTIONS.CHEAPEST_WITH_DELIVERY_ONLY;
+	}
+
+	if(isWidgetChecked(SORT_OVERRIDE_OPTIONS.NEWEST_FIRST))
+	{
+		return SORT_OVERRIDE_OPTIONS.NEWEST_FIRST;
+	}
+
+	if(isWidgetChecked(OVERRIDE_OPTIONS.DISABLE))
+	{
+		return SORT_OVERRIDE_OPTIONS.DISABLE;
+	}
+}
+
+
+
 function isWidgetChecked(widgetId)
 {
 	let widget = document.getElementById(widgetId);
@@ -87,3 +143,8 @@ document.getElementById(OVERRIDE_OPTIONS.COUNTRY_ONLY).addEventListener('click',
 document.getElementById(OVERRIDE_OPTIONS.CONTINENT_ONLY).addEventListener('click', saveOptions);
 document.getElementById(OVERRIDE_OPTIONS.CONTINENTAL_REGION_ONLY).addEventListener('click', saveOptions);
 document.getElementById(OVERRIDE_OPTIONS.DISABLE).addEventListener('click',  saveOptions);
+
+document.getElementById(SORT_OVERRIDE_OPTIONS.BEST_RESULTS).addEventListener('click', saveOptions);
+document.getElementById(SORT_OVERRIDE_OPTIONS.CHEAPEST_WITH_DELIVERY_ONLY).addEventListener('click', saveOptions);
+document.getElementById(SORT_OVERRIDE_OPTIONS.NEWEST_FIRST).addEventListener('click', saveOptions);
+document.getElementById(SORT_OVERRIDE_OPTIONS.DISABLE).addEventListener('click',  saveOptions);

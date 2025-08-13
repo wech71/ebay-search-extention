@@ -15,11 +15,18 @@ function onInit()
 
 function initOptions() 
 {
-	getOverrideOptionFromStorage(function(currentOverrideOption) {
+	getOverrideOptionFromStorage(function(currentOverrideOption, sortOverrideOption) {
 		if(!isOverrideOptionValid(currentOverrideOption))
 		{
 			saveOverrideOptionToStorage(defaultOverride, function(){
-				log("Override option set to default: " + defaultOverride);
+				log("Override location option set to default: " + defaultOverride);
+			});
+		}
+
+		if(!isSortOverrideOptionValid(sortOverrideOption))
+		{
+			saveSortOverrideOptionToStorage(defaultSortOverride, function(){
+				log("Override sort option set to default: " + defaultSortOverride);
 			});
 		}
 	});
@@ -51,8 +58,8 @@ function handleTabUpdate(event)
 	{
 		if(tabId !== undefined)
 		{
-			getOverrideOptionFromStorage(function(currentOverrideOption) {
-				processNewUrl(tabId, newUrl, currentOverrideOption);
+			getOverrideOptionFromStorage(function(currentOverrideOption, sortOverrideOption) {
+				processNewUrl(tabId, newUrl, currentOverrideOption, sortOverrideOption);
 			});
 		}
 		else
@@ -66,7 +73,7 @@ function handleTabUpdate(event)
 	}
 }
 
-function processNewUrl(tabId, url, overrideOption)
+function processNewUrl(tabId, url, overrideOption, sortOverrideOption)
 {
 	if(overrideOption === OVERRIDE_OPTIONS.DISABLE)
 	{
@@ -83,15 +90,44 @@ function processNewUrl(tabId, url, overrideOption)
 			let processedUrl = url;
 			let urlChanged = false;
 
-			if(overrideOption === OVERRIDE_OPTIONS.COUNTRY_ONLY)
+
+			if(sortOverrideOption != SORT_OVERRIDE_OPTIONS.DISABLE)
 			{
-				if(!optionInUrlNeedsUpdating(url, EBAY_LOCATION_IDENTIFIER, COUNTRY_LOCATION_VALUE))
+				var sortValue;
+				switch(sortOverrideOption)
 				{
-					log("Location not set yet: " + url, MESSAGE_TYPES.DEBUG);
+					case SORT_OVERRIDE_OPTIONS.CHEAPEST_WITH_DELIVERY_ONLY: 
+						sortValue = SORT_WITH_DEVLIVERY_DESCENDING_VALUE; 
+						break;
+					case SORT_OVERRIDE_OPTIONS.NEWEST_FIRST: 
+						sortValue = SORT_BEST_RESULTS_VALUE; 
+						break;
+					case SORT_OVERRIDE_OPTIONS.BEST_RESULTS: 
+						sortValue = SORT_NEW_VALUE; 
+						break;					
+				}
+
+				if(!optionInUrlNeedsUpdating(processedUrl, EBAY_SORT_IDENTIFIER, sortValue))
+				{
+					log("sort order not set yet: " + processedUrl, MESSAGE_TYPES.DEBUG);
 
 					stopLoading(tabId);
 
-					processedUrl = updateOptionInUrl(url, EBAY_LOCATION_IDENTIFIER, COUNTRY_LOCATION_VALUE);
+					processedUrl = updateOptionInUrl(url, EBAY_SORT_IDENTIFIER, sortValue);
+
+					urlChanged = true;
+				}
+			}
+
+			if(overrideOption === OVERRIDE_OPTIONS.COUNTRY_ONLY)
+			{
+				if(!optionInUrlNeedsUpdating(processedUrl, EBAY_LOCATION_IDENTIFIER, COUNTRY_LOCATION_VALUE))
+				{
+					log("Location not set yet: " + processedUrl, MESSAGE_TYPES.DEBUG);
+
+					stopLoading(tabId);
+
+					processedUrl = updateOptionInUrl(processedUrl, EBAY_LOCATION_IDENTIFIER, COUNTRY_LOCATION_VALUE);
 
 					urlChanged = true;
 				}

@@ -6,6 +6,14 @@ function isOverrideOptionValid(option)
 		    option === OVERRIDE_OPTIONS.DISABLE);
 }
 
+function isSortOverrideOptionValid(option)
+{
+	return (option === SORT_OVERRIDE_OPTIONS.BEST_RESULTS ||
+		    option === SORT_OVERRIDE_OPTIONS.CHEAPEST_WITH_DELIVERY_ONLY ||
+		    option === SORT_OVERRIDE_OPTIONS.NEWEST_FIRST ||
+		    option === SORT_OVERRIDE_OPTIONS.DISABLE);
+}
+
 function log(message, messageType)
 {
 	if(shouldLog === true) 
@@ -33,16 +41,37 @@ function log(message, messageType)
 function getOverrideOptionFromStorage(callBack)
 {
 	getStorage(function(items) {
-		callBack(items.overrideOption);
+		callBack(items.overrideOption, items.sortOverrideOption);
 	});
 }
 
-function saveOverrideOptionToStorage(overrideOption, callBack)
+function saveOverrideOptionToStorage(overrideOption, sortOverrideOption, callBack)
+{
+	setStorage(STORAGE_KEYS.OVERRIDE_OPTION, overrideOption, function(){
+		callBack();
+	});
+
+	setStorage(STORAGE_KEYS.SORT_OVERRIDE_OPTION, sortOverrideOption, function(){
+		callBack();
+	});
+}
+
+
+function saveLocationOverrideOptionToStorage(overrideOption, callBack)
 {
 	setStorage(STORAGE_KEYS.OVERRIDE_OPTION, overrideOption, function(){
 		callBack();
 	});
 }
+
+
+function saveSortOverrideOptionToStorage(sortOverrideOption, callBack)
+{
+	setStorage(STORAGE_KEYS.SORT_OVERRIDE_OPTION, sortOverrideOption, function(){
+		callBack();
+	});
+}
+
 
 function getStorage(callBack)
 {
